@@ -586,9 +586,10 @@ MonoBehaviour:
   distanceUp: 1
   distanceAway: 3
   smooth: 5
-  camSmoothDampTime: .546999991
-  wideScreen: .200000003
-  taegetingTime: .5
+  camSmoothDampTime: 1.26100004
+  camSmoothDampTimeGoBack: .25
+  lookDirDampTime: 1.27999997
+  camState: 0
 --- !u!1 &565086904
 GameObject:
   m_ObjectHideFlags: 0

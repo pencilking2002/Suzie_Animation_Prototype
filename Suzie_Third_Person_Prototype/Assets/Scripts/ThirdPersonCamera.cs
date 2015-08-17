@@ -16,11 +16,17 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 	[Range(0.0f, 2.0f)]
 	public float camSmoothDampTime = 0.1f;
+
+	[Range(0.0f, 2.0f)]
+	public float camSmoothDampTimeGoBack = 0.25f;	// damp time when the char is running into cam. This value is less so that we caa see the char us hes running into the cam
+
+	[Range(0.0f, 2.0f)]
+	public float lookDirDampTime = 0.1f;
 	
 	// Camera recentering
-	[Header("Recenter Camera")]
-	public float wideScreen = 0.2f;
-	public float taegetingTime = 0.5f;
+	//[Header("Recenter Camera")]
+	//public float wideScreen = 0.2f;
+	//public float taegetingTime = 0.5f;
 	
 	// Camera States
 	public enum CamState
@@ -30,43 +36,90 @@ public class ThirdPersonCamera : MonoBehaviour
 		Target,
 		Free
 	}
-	private CamState camState = CamState.Behind;
+	[HideInInspector]
+	public CamState camState = CamState.Behind;
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------
-		
+
+	private float origCamSmoothDampTime;
+
 	private Vector3 charOffset;
 	private Transform follow;
 	private Vector3 targetPos;
 	private Vector3 lookDir; 		// Direction the cam will be looking in
-	
+	private Vector3 curLookDir;
+
+	private CharState charState;
+
 	//temp vars
 	private Vector3 velocityCamSmooth = Vector3.zero;
-	
-	
+	private Vector3 velocityLookDir = Vector3.zero;
+
+
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
 	
 	private void Start()
 	{
+		// cache the original cam smoooth damp time
+		origCamSmoothDampTime = camSmoothDampTime;
+
 		follow = GameObject.FindGameObjectWithTag("Follow").transform;
+		curLookDir = follow.forward;
+
+		// Get player's character state
+		charState = follow.parent.GetComponent<CharState> ();
 	}
 	
 	private void LateUpdate ()
 	{
 		charOffset = follow.position + new Vector3(0f, distanceUp, 0f);
-		
-		//if (Input.GetAxis (
-		lookDir = charOffset - transform.position;
-		lookDir.y = 0.0f;
-		lookDir.Normalize();
+
+		//if (inputDevice.RightBumper.WasPressed)
+		switch (camState) 
+		{
+			case CamState.Behind: 
+	
+				if (charState.IsInLocomotion())
+				{
+					print ("in locomotion");
+					lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)));
+					curLookDir = Vector3.Normalize (charOffset - transform.position);
+					lookDir.y = 0.0f;
+					
+					curLookDir = Vector3.SmoothDamp (curLookDir, lookDir, ref velocityLookDir, lookDirDampTime);
+				}
+				else
+				{
+					lookDir = charOffset - transform.position;
+					lookDir.y = 0.0f;
+					lookDir.Normalize ();
+				}
+				
+				//targetPos = charOffset + follow.up * distanceUp - Vector3.Normalize (curLookDir) * distanceAway;
+				
+				break;
+
+			case CamState.Target:
+				curLookDir = follow.forward;
+				lookDir = follow.forward;
+				break;
+		}
+
 
 		targetPos = charOffset + follow.up * distanceUp - lookDir * distanceAway;
-		
+
 		CompensateForWalls(charOffset, ref targetPos);
-		
+
+		// if the char is runnign towards the camera, make the cam follow him with less damping
+		if (InputController.v < -0.5f)
+			camSmoothDampTime = camSmoothDampTimeGoBack;
+		else
+			camSmoothDampTime = origCamSmoothDampTime;
+
 		transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, camSmoothDampTime);
 		
 		transform.LookAt(charOffset);
@@ -93,8 +146,20 @@ public class ThirdPersonCamera : MonoBehaviour
 	private void RecenterCam (InputController.InputEvent _event)
 	{
 		if (_event == InputController.InputEvent.RecenterCam)
+		{
+			SetState (CamState.Target);
 			print ("Recenter Cam");
+		} else if (_event == InputController.InputEvent.CamBehind)
+		{
+		
+			SetState(CamState.Behind);
+			print ("Recenter Cam");		
+		}
 	}
 
+	private void SetState (CamState _state)
+	{
+		camState = _state;
+	}
 	
 }

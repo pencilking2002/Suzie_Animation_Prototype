@@ -20,7 +20,8 @@ public class InputController : MonoBehaviour {
 	public enum InputEvent										
 	{
 		JumpUp,
-		RecenterCam
+		RecenterCam,
+		CamBehind
 	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -48,9 +49,14 @@ public class InputController : MonoBehaviour {
 			print ("Pressed Jump");
 		}
 		
-		if (inputDevice.RightBumper)
+		if (inputDevice.RightBumper.WasPressed)
 		{
 			onInput(InputEvent.RecenterCam);	
+		}
+
+		if (inputDevice.RightBumper.WasReleased)
+		{
+			onInput(InputEvent.CamBehind);	
 		}
 		
 	}
