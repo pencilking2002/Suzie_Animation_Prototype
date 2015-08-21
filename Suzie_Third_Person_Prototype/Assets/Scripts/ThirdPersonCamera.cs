@@ -14,15 +14,21 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 	public float smooth;
 	
-	[Range(0.0f, 2.0f)]
+	[Range(0.0f, 100.0f)]
 	public float camSmoothDampTime = 0.1f;
+
+	[Range(0.0f, 100.0f)]
+	public float camTargetSmoothDampTime = 0.1f;
+	//private float originaCamSmoothTime;
 
 	[Range(0.0f, 2.0f)]
 	public float camSmoothDampTimeGoBack = 0.25f;	// damp time when the char is running into cam. This value is less so that we caa see the char us hes running into the cam
 
 	[Range(0.0f, 2.0f)]
 	public float lookDirDampTime = 0.1f;
-	
+
+	[Range(0.0f, 50f)]
+	public float goBackLerpSpeed = 5f;
 	// Camera recentering
 	//[Header("Recenter Camera")]
 	//public float wideScreen = 0.2f;
@@ -42,6 +48,8 @@ public class ThirdPersonCamera : MonoBehaviour
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------
+
+	private float goBackVel;
 
 	private float origCamSmoothDampTime;
 
@@ -64,8 +72,11 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 	private void Start()
 	{
-		// cache the original cam smoooth damp time
+		//camTargetSmoothDampTime = camSmoothDampTime;
 		origCamSmoothDampTime = camSmoothDampTime;
+
+		// cache the original cam smoooth damp time
+		//origCamSmoothDampTime = camSmoothDampTime;
 
 		follow = GameObject.FindGameObjectWithTag("Follow").transform;
 		curLookDir = follow.forward;
@@ -77,6 +88,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	private void LateUpdate ()
 	{
 		charOffset = follow.position + new Vector3(0f, distanceUp, 0f);
+		//camSmoothDampTime = origCamSmoothDampTime;
 
 		//if (inputDevice.RightBumper.WasPressed)
 		switch (camState) 
@@ -86,11 +98,12 @@ public class ThirdPersonCamera : MonoBehaviour
 				if (charState.IsInLocomotion())
 				{
 					print ("in locomotion");
-					lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)));
+					//lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)) * goBackLerpSpeed * Time.deltaTime);
 					curLookDir = Vector3.Normalize (charOffset - transform.position);
 					lookDir.y = 0.0f;
 					
 					curLookDir = Vector3.SmoothDamp (curLookDir, lookDir, ref velocityLookDir, lookDirDampTime);
+					
 				}
 				else
 				{
@@ -104,6 +117,8 @@ public class ThirdPersonCamera : MonoBehaviour
 				break;
 
 			case CamState.Target:
+				
+				//camSmoothDampTime = camTargetSmoothDampTime;
 				curLookDir = follow.forward;
 				lookDir = follow.forward;
 				break;
@@ -115,12 +130,12 @@ public class ThirdPersonCamera : MonoBehaviour
 		CompensateForWalls(charOffset, ref targetPos);
 
 		// if the char is runnign towards the camera, make the cam follow him with less damping
-		if (InputController.v < -0.5f)
-			camSmoothDampTime = camSmoothDampTimeGoBack;
-		else
-			camSmoothDampTime = origCamSmoothDampTime;
+		//if (InputController.v < -0.5f)
+		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, InputController.v < -0.05 ? camSmoothDampTimeGoBack : origCamSmoothDampTime, ref goBackVel, goBackLerpSpeed * Time.deltaTime);
+		//else
+			//camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, origCamSmoothDampTime, ref goBackVel, goBackLerpSpeed * Time.deltaTime);
 
-		transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, camSmoothDampTime);
+		transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, (camState == CamState.Target ? camTargetSmoothDampTime : camSmoothDampTime) * Time.deltaTime);
 		
 		transform.LookAt(charOffset);
 		//var lookRot = Quaternion.LookRotation(charOffset - transform.position);

@@ -586,9 +586,11 @@ MonoBehaviour:
   distanceUp: 1
   distanceAway: 3
   smooth: 5
-  camSmoothDampTime: 1.26100004
+  camSmoothDampTime: 78.8000031
+  camTargetSmoothDampTime: 17.2999992
   camSmoothDampTimeGoBack: .25
-  lookDirDampTime: 1.27999997
+  lookDirDampTime: .108999997
+  goBackLerpSpeed: 37.4000015
   camState: 0
 --- !u!1 &565086904
 GameObject:
