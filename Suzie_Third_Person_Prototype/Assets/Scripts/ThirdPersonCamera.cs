@@ -160,23 +160,20 @@ public class ThirdPersonCamera : MonoBehaviour
 	
 	private void RecenterCam (InputController.InputEvent _event)
 	{
-		if (_event == InputController.InputEvent.RecenterCam) 
+		if (_event == InputController.InputEvent.RecenterCam)
 		{
 			SetState (CamState.Target);
-			//print ("Recenter Cam");
-		}
-		else if (_event == InputController.InputEvent.CamBehind)
+			print ("Recenter Cam");
+		} else if (_event == InputController.InputEvent.CamBehind)
 		{
 		
 			SetState(CamState.Behind);
-			//print ("cam behind");
-
+			print ("Recenter Cam");		
 		}
 	}
 
 	private void SetState (CamState _state)
 	{
-		print ("setting state to : " + _state);
 		camState = _state;
 	}
 	
