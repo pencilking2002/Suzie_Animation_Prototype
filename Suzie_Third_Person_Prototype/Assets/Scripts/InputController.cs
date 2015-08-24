@@ -51,14 +51,24 @@ public class InputController : MonoBehaviour {
 		
 		if (inputDevice.RightBumper.WasPressed)
 		{
-			onInput(InputEvent.RecenterCam);	
+			RecenterCam();
 		}
 
-		if (inputDevice.RightBumper.WasReleased)
-		{
-			onInput(InputEvent.CamBehind);	
-		}
+//		if (inputDevice.RightBumper.WasReleased)
+//		{
+//			onInput(InputEvent.CamBehind);	
+//		}
 		
+	}
+
+	private void RecenterCam()
+	{
+		onInput(InputEvent.RecenterCam);
+		
+		Util.Instance.DelayedAction(() => {
+			print ("Run");
+			onInput(InputEvent.CamBehind);
+		}, 2f);
 	}
 		
 	
