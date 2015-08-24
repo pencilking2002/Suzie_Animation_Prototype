@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour {
 	{
 		if (GameManager.debug)
 		{
-			GUI.Button(new Rect(30, 30, 170, 50), "Squirrel State: " + charStateScript.state.ToString());
+			GUI.Button(new Rect(30, 30, 170, 50), "Squirrel State: " + charStateScript.GetState());
 			GUI.Button(new Rect(30, 100, 170, 50), "Cam State: " + camScript.camState.ToString());
 		}
 	}

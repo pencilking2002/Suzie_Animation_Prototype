@@ -20,7 +20,7 @@ public class CharState : MonoBehaviour {
 		InAir
 	}
 	
-	public State state = State.InAir;
+	private State state = State.InAir;
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
@@ -49,6 +49,12 @@ public class CharState : MonoBehaviour {
 	public bool IsInLocomotion()
 	{
 		return state == State.Running;
+	}
+	
+	public bool IsJumping()
+	{
+		return (state == State.IdleJumping || state == State.IdleJumping || state == State.RunningJumping || state == State.Falling);
+		
 	}
 	
 }

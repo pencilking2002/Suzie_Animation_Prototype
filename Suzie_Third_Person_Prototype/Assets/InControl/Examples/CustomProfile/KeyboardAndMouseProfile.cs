@@ -69,6 +69,14 @@ namespace CustomProfileExample
 					// KeyCodeComboButton requires that all KeyCode params are down simultaneously.
 					Source = KeyCodeComboButton( KeyCode.LeftAlt, KeyCode.Alpha1 )
 				},
+				
+				new InputControlMapping
+				{
+					Handle = "RecenterCam",
+					Target = InputControlType.RightBumper,
+					// KeyCodeComboButton requires that all KeyCode params are down simultaneously.
+					Source = KeyCodeComboButton( KeyCode.F )
+				},
 			};
 
 			AnalogMappings = new[]
