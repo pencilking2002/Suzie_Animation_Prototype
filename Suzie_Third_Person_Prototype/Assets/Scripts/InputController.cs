@@ -12,6 +12,7 @@ public class InputController : MonoBehaviour {
 	
 	public static float h, v;
 	
+	
 	// Input Events -------------------------------------------------------------
 	public delegate void InputAction(InputEvent inputEvent);
 	public static InputAction onInput;
@@ -23,6 +24,10 @@ public class InputController : MonoBehaviour {
 		RecenterCam,
 		CamBehind
 	}
+	
+	[HideInInspector]
+	public float jumpKeyHoldDuration = 0.0f;
+	
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Priate Variables
@@ -43,20 +48,30 @@ public class InputController : MonoBehaviour {
 		//print (v);
 		
 		// if pressed Y or pressed Space
-		if (inputDevice.Action4.WasPressed)
+		if (inputDevice.Action4.IsPressed)
 		{
-			onInput(InputEvent.JumpUp);	
-			print ("Pressed Jump");
+			jumpKeyHoldDuration += Time.deltaTime;
 		}
 		
-		if (inputDevice.RightBumper.WasPressed)
+		// if pressed Y or pressed Space
+		if (inputDevice.Action4.WasReleased)
 		{
-			onInput(InputEvent.RecenterCam);	
+			onInput(InputEvent.JumpUp);
+			
+			// Reset the jump key timer
+			jumpKeyHoldDuration = 0.0f;
+				
+			//print ("Pressed Jump");
 		}
+		
+//		if (inputDevice.RightBumper.WasPressed)
+//		{
+//			onInput(InputEvent.RecenterCam);	
+//		}
 
 		if (inputDevice.RightBumper.WasReleased)
 		{
-			onInput(InputEvent.CamBehind);	
+			onInput(InputEvent.RecenterCam);	
 		}
 		
 	}

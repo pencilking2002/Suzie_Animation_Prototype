@@ -127,6 +127,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42236daaa715a4120857563f09222762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  jumpKeyHoldDuration: 0
 --- !u!1 &55812878
 GameObject:
   m_ObjectHideFlags: 0
@@ -447,32 +448,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DirectionDampTime: 1
   directionSpeed: 1
+  jumpForce: 60
+  maxJumpForce: 80
 --- !u!4 &442910724 stripped
 Transform:
   m_PrefabParentObject: {fileID: 465690, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}
   m_PrefabInternal: {fileID: 593336847}
---- !u!114 &442910728
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 442910722}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73d16997bff0c4388b05dfb39215bfed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  on: 1
-  onlyInPlayMode: 1
-  sceneViewFollowers:
-  - enable: 1
-    positionOffset: {x: 0, y: 8.89999962, z: 0}
-    enableFixedRotation: 1
-    fixedRotation: {x: 90, y: 0, z: 0}
-    targetTransform: {fileID: 442910724}
-    size: .00999999978
-    orthographic: 0
-    sceneViewIndex: 0
 --- !u!114 &442910729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -484,7 +465,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7785c42c895043939d7f608ac96b11b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 7
 --- !u!1 &518505460
 GameObject:
   m_ObjectHideFlags: 0
@@ -586,12 +566,13 @@ MonoBehaviour:
   distanceUp: 1
   distanceAway: 3
   smooth: 5
-  camSmoothDampTime: 78.8000031
+  camSmoothDampTime: 19.2999992
   camTargetSmoothDampTime: 17.2999992
   camSmoothDampTimeGoBack: .25
   lookDirDampTime: .108999997
   goBackLerpSpeed: 37.4000015
   camState: 0
+  follow: {fileID: 2086329366}
 --- !u!1 &565086904
 GameObject:
   m_ObjectHideFlags: 0
@@ -730,6 +711,10 @@ Prefab:
     - target: {fileID: 5486736, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}
       propertyPath: m_AngularDrag
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 128798, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}

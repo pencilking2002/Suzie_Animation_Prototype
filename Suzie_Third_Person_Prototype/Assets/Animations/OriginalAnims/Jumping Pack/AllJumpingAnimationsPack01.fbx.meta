@@ -698,7 +698,7 @@ ModelImporter:
       name: Idle_Jump
       takeName: Take 001
       firstFrame: 28
-      lastFrame: 45
+      lastFrame: 39
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1369,7 +1369,7 @@ ModelImporter:
     - serializedVersion: 16
       name: Jump_Landing
       takeName: Take 001
-      firstFrame: 85
+      firstFrame: 90
       lastFrame: 105
       wrapMode: 0
       orientationOffsetY: 0
@@ -1382,13 +1382,21 @@ ModelImporter:
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
+      keepOriginalPositionY: 0
       keepOriginalPositionXZ: 0
-      heightFromFeet: 0
+      heightFromFeet: 1
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: .142961696
+        functionName: ApplyRootMotion
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: f60380dc282394f72b9d725707ab199d,
+          type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask:
       - path: 
         weight: 1

@@ -54,7 +54,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	private float origCamSmoothDampTime;
 
 	private Vector3 charOffset;
-	private Transform follow;
+	public Transform follow;
 	private Vector3 targetPos;
 	private Vector3 lookDir; 		// Direction the cam will be looking in
 	private Vector3 curLookDir;
@@ -70,34 +70,29 @@ public class ThirdPersonCamera : MonoBehaviour
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
 	
-	private void Start()
+	private void Awake()
 	{
-		//camTargetSmoothDampTime = camSmoothDampTime;
+	
 		origCamSmoothDampTime = camSmoothDampTime;
 
-		// cache the original cam smoooth damp time
-		//origCamSmoothDampTime = camSmoothDampTime;
-
-		follow = GameObject.FindGameObjectWithTag("Follow").transform;
+		//follow = GameObject.FindGameObjectWithTag("Follow").transform;
 		curLookDir = follow.forward;
 
 		// Get player's character state
-		charState = follow.parent.GetComponent<CharState> ();
+		charState = GameObject.FindObjectOfType<CharState> ();
+		print (follow);
 	}
 	
 	private void LateUpdate ()
 	{
 		charOffset = follow.position + new Vector3(0f, distanceUp, 0f);
-		//camSmoothDampTime = origCamSmoothDampTime;
 
-		//if (inputDevice.RightBumper.WasPressed)
 		switch (camState) 
 		{
 			case CamState.Behind: 
 	
 				if (charState.IsInLocomotion())
 				{
-					print ("in locomotion");
 					//lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)) * goBackLerpSpeed * Time.deltaTime);
 					curLookDir = Vector3.Normalize (charOffset - transform.position);
 					lookDir.y = 0.0f;
@@ -111,16 +106,19 @@ public class ThirdPersonCamera : MonoBehaviour
 					lookDir.y = 0.0f;
 					lookDir.Normalize ();
 				}
-				
-				//targetPos = charOffset + follow.up * distanceUp - Vector3.Normalize (curLookDir) * distanceAway;
-				
+								
 				break;
 
 			case CamState.Target:
 				
-				//camSmoothDampTime = camTargetSmoothDampTime;
+			
 				curLookDir = follow.forward;
 				lookDir = follow.forward;
+				
+				// Check if the camera has finished recentering. if so, go back to Behind state
+				if (transform.position.z <= targetPos.z + 0.1f && transform.position.z >= targetPos.z - 0.1f)
+					SetState(CamState.Behind); //print ("Camera recentered");
+					
 				break;
 		}
 

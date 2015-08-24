@@ -10,11 +10,19 @@ public class CharController : MonoBehaviour {
 	public float DirectionDampTime = 0.25f;
 	public float directionSpeed = 3.0f;
 	
+	public float jumpForce = 10f;
+	public float maxJumpForce = 10f;
+	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------	
 	
+	
+	private float totalJump;			// Total amount of jump to add to the character
+		
 	private Animator animator;
+	private Rigidbody rb;
+	
 	private float speed = 0.0f;
 	private float direction = 0.0f;
 	private Transform cam;
@@ -43,6 +51,7 @@ public class CharController : MonoBehaviour {
 		animator = GetComponent<Animator>();
 		
 		charState = GetComponent<CharState>();
+		rb = GetComponent<Rigidbody>();
 	}
 	
 	private void Update ()
@@ -53,21 +62,49 @@ public class CharController : MonoBehaviour {
 		animator.SetFloat ("Speed", speed);
 		animator.SetFloat ("Direction", InputController.h == 0 ? 0 : direction, DirectionDampTime, Time.deltaTime);
 		
+//		if (charState.IsJumping() && rb.velocity.y < 0.0f && Physics.Raycast(transform.position, Vector3.down , 0.1f))
+//		{
+//			animator.SetTrigger("JumpDown");
+//		}
+			
+		
 	}
 	
 	// Hook on to Input event
-	private void OnEnable () { InputController.onInput += JumpUpAnim; }
-	private void OnDisable () { InputController.onInput -= JumpUpAnim; }
+	private void OnEnable () { InputController.onInput += Jump; }
+	private void OnDisable () { InputController.onInput -= Jump; }
 	
-	// Trigger the jump up animation
-	private void JumpUpAnim(InputController.InputEvent _event)
+	// Trigger the jump animation and disable root motion
+	public void Jump (InputController.InputEvent _event)
 	{
 		if (_event == InputController.InputEvent.JumpUp)
 		{
-			if (speed == 0 )
-		 		animator.SetTrigger("IdleJump");
-		 	else
-				animator.SetTrigger("RunningJump");
+			//print ("Jump");
+			
+			JumpUpAnim();
+			
+			//ApplyRootMotion(false);
+			
+			totalJump = Mathf.Clamp(jumpForce + jumpForce * InputController.Instance.jumpKeyHoldDuration, 0, maxJumpForce);
+			
+			rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+		}
+		
+	}
+	
+	// Trigger the jump up animation
+	private void JumpUpAnim()
+	{
+		if (speed == 0 )
+		{
+			//charState.SetState(CharState.State.IdleJumping);
+	 		animator.SetTrigger("IdleJump");
+	 		print ("Triggered idle jump");
+	 	}
+	 	else
+	 	{
+			//charState.SetState(CharState.State.RunningJumping);
+			animator.SetTrigger("RunningJump");
 		}
 	}
 	
@@ -122,6 +159,22 @@ public class CharController : MonoBehaviour {
 		directionOut = angleRootToMove * directionSpeed;
 		
 	}
+	
+	// Enable 
+	public void ApplyRootMotion ()
+	{
+		animator.applyRootMotion = true;
+	}
+	
+	private void OnCollisionEnter (Collision coll)
+	{
+		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
+		{
+			animator.SetTrigger("Land");
+			print ("Jump Down");
+		}
+	}
+	
 	
 	
 }
