@@ -573,6 +573,7 @@ MonoBehaviour:
   lookDirDampTime: .108999997
   goBackLerpSpeed: 37.4000015
   camState: 0
+  targetLerpSpeed: 3
   follow: {fileID: 2086329366}
 --- !u!1 &565086904
 GameObject:

@@ -177,12 +177,12 @@ public class CharController : MonoBehaviour {
 		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
 		{
 			//ContactPoint contact = coll.contacts[0];
-			print ("Collision from below. Jump Down");
+			//print ("Collision from below. Jump Down");
 			
 			if (Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f)
 			{
 				animator.SetTrigger("Land");
-				print ("Collision from below. Jump Down");
+				//print ("Collision from below. Jump Down");
 			}
 		}
 	}

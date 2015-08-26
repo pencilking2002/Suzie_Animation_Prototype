@@ -11,7 +11,7 @@ public class InputController : MonoBehaviour {
 	public static InputController Instance;
 	
 	public static float h, v;
-	
+	public static float orbitH;
 	
 	// Input Events -------------------------------------------------------------
 	public delegate void InputAction(InputEvent inputEvent);
@@ -22,7 +22,8 @@ public class InputController : MonoBehaviour {
 	{
 		JumpUp,
 		RecenterCam,
-		CamBehind
+		CamBehind,
+		OrbitCamera
 	}
 	
 	[HideInInspector]
@@ -45,6 +46,7 @@ public class InputController : MonoBehaviour {
 		
 		h = inputDevice.LeftStickX;
 		v = inputDevice.LeftStickY;
+		orbitH = inputDevice.RightStickX;
 		//print (v);
 		
 		// if pressed Y or pressed Space
@@ -63,17 +65,24 @@ public class InputController : MonoBehaviour {
 				
 			//print ("Pressed Jump");
 		}
-		
-//		if (inputDevice.RightBumper.WasPressed)
-//		{
-//			onInput(InputEvent.RecenterCam);	
-//		}
 
 		if (inputDevice.RightBumper.WasReleased)
 		{
 			onInput(InputEvent.RecenterCam);	
 		}
-		
+		//print (inputDevice.RightStickX);
+
+		if (inputDevice.RightStickX.WasPressed)
+		{
+			onInput(InputEvent.OrbitCamera);
+			//print ("Down");
+		}
+
+		if (inputDevice.RightStickX.WasReleased)
+		{
+			onInput(InputEvent.CamBehind);
+			//print ("Down");
+		}	
 	}
 		
 	

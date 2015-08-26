@@ -40,11 +40,13 @@ public class ThirdPersonCamera : MonoBehaviour
 		Behind,
 		FirstPerson,
 		Target,
-		Free
+		Free,
+		Orbit
 	}
 	[HideInInspector]
 	public CamState camState = CamState.Behind;
-	
+	public float targetLerpSpeed = 3f;
+	public float orbitSpeed = 30f;
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -64,8 +66,8 @@ public class ThirdPersonCamera : MonoBehaviour
 	//temp vars
 	private Vector3 velocityCamSmooth = Vector3.zero;
 	private Vector3 velocityLookDir = Vector3.zero;
-
-
+	private float tempCamSmooth;
+	private float smoothLerpSpeed;
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
@@ -80,7 +82,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		// Get player's character state
 		charState = GameObject.FindObjectOfType<CharState> ();
-		print (follow);
+		//print (follow);
 	}
 	
 	private void LateUpdate ()
@@ -90,9 +92,16 @@ public class ThirdPersonCamera : MonoBehaviour
 		switch (camState) 
 		{
 			case CamState.Behind: 
-	
+				
+				smooth = origCamSmoothDampTime;
+				smoothLerpSpeed = goBackLerpSpeed;
+
 				if (charState.IsInLocomotion())
 				{
+					// If the character is running backward, switch the damping to a lower value so the Squirrel will keep a far distance to the camera
+					if (InputController.v < -0.05) 
+						smooth = camSmoothDampTimeGoBack;
+
 					//lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)) * goBackLerpSpeed * Time.deltaTime);
 					curLookDir = Vector3.Normalize (charOffset - transform.position);
 					lookDir.y = 0.0f;
@@ -106,20 +115,30 @@ public class ThirdPersonCamera : MonoBehaviour
 					lookDir.y = 0.0f;
 					lookDir.Normalize ();
 				}
-								
+
 				break;
 
 			case CamState.Target:
 				
-			
 				curLookDir = follow.forward;
 				lookDir = follow.forward;
 				
-				// Check if the camera has finished recentering. if so, go back to Behind state
-				if (transform.position.z <= targetPos.z + 0.1f && transform.position.z >= targetPos.z - 0.1f)
-					SetState(CamState.Behind); //print ("Camera recentered");
-					
-				break;
+				// Tighten up the smoothing if the camera is being recentered
+				smooth = 0.25f;
+				smoothLerpSpeed = targetLerpSpeed;
+				// if camera and character are facing basially the same direction, switch out of Target mode
+				if (Vector3.Dot (transform.forward, follow.forward) > 0.9f)
+			    	SetState(CamState.Behind);
+				
+			break;
+
+//			case CamState.Orbit :
+//				
+////				print ("Orbit state");
+////				lookDir = charOffset - transform.position;
+////				targetPos = charOffset + follow.up * distanceUp - (lookDir * ) * distanceAway;
+//				break;
+	
 		}
 
 
@@ -127,14 +146,14 @@ public class ThirdPersonCamera : MonoBehaviour
 
 		CompensateForWalls(charOffset, ref targetPos);
 
-		// if the char is runnign towards the camera, make the cam follow him with less damping
-		//if (InputController.v < -0.5f)
-		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, InputController.v < -0.05 ? camSmoothDampTimeGoBack : origCamSmoothDampTime, ref goBackVel, goBackLerpSpeed * Time.deltaTime);
-		//else
-			//camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, origCamSmoothDampTime, ref goBackVel, goBackLerpSpeed * Time.deltaTime);
-
-		transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, (camState == CamState.Target ? camTargetSmoothDampTime : camSmoothDampTime) * Time.deltaTime);
+		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, smooth, ref goBackVel, smoothLerpSpeed * Time.deltaTime);
 		
+
+		if (camState == CamState.Orbit && !charState.IsInLocomotion())
+			transform.RotateAround(follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
+		else
+			transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, camSmoothDampTime * Time.deltaTime);
+
 		transform.LookAt(charOffset);
 		//var lookRot = Quaternion.LookRotation(charOffset - transform.position);
 		//transform.rotation = Quaternion.Lerp(transform.rotation,lookRot,Time.deltaTime* 20f);
@@ -153,8 +172,16 @@ public class ThirdPersonCamera : MonoBehaviour
 	}
 	
 	// Hook on to Input event
-	private void OnEnable () { InputController.onInput += RecenterCam; }
-	private void OnDisable () { InputController.onInput -= RecenterCam; }
+	private void OnEnable () 
+	{ 
+		InputController.onInput += RecenterCam;
+		InputController.onInput += Orbit; 
+	}
+	private void OnDisable () 
+	{ 
+		InputController.onInput -= RecenterCam;
+		InputController.onInput -= Orbit; 
+	}
 	
 	private void RecenterCam (InputController.InputEvent _event)
 	{
@@ -164,10 +191,15 @@ public class ThirdPersonCamera : MonoBehaviour
 			print ("Recenter Cam");
 		} else if (_event == InputController.InputEvent.CamBehind)
 		{
-		
 			SetState(CamState.Behind);
 			print ("Recenter Cam");		
 		}
+	}
+
+	private void Orbit (InputController.InputEvent _event)
+	{
+		if (_event == InputController.InputEvent.OrbitCamera)
+			SetState (CamState.Orbit);
 	}
 
 	private void SetState (CamState _state)
