@@ -11,7 +11,7 @@ public class CharController : MonoBehaviour {
 	public float directionSpeed = 3.0f;
 	
 	public float jumpForce = 10f;
-	public float maxJumpForce = 10f;
+	private float maxJumpForce;
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
@@ -52,6 +52,8 @@ public class CharController : MonoBehaviour {
 		
 		charState = GetComponent<CharState>();
 		rb = GetComponent<Rigidbody>();
+		
+		maxJumpForce = jumpForce + 20f;
 	}
 	
 	private void Update ()
@@ -170,8 +172,13 @@ public class CharController : MonoBehaviour {
 	{
 		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
 		{
-			animator.SetTrigger("Land");
-			print ("Jump Down");
+			ContactPoint contact = coll.contacts[0];
+			
+			if (Vector3.Dot(contact.normal, Vector3.up) > 0.5f)
+			{
+				animator.SetTrigger("Land");
+				print ("Collision from below. Jump Down");
+			}
 		}
 	}
 	
