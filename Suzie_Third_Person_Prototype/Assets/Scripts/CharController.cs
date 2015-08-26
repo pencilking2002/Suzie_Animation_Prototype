@@ -27,6 +27,9 @@ public class CharController : MonoBehaviour {
 	private float direction = 0.0f;
 	private Transform cam;
 	
+	// Speed modifier of the character's Z movement wheile jumping
+	public float jumpZSpeed = 10f;
+	
 	// Temp vars
 	//private Vector3 rootDirection;
 	private Vector3 stickDirection;
@@ -62,14 +65,27 @@ public class CharController : MonoBehaviour {
 		StickToWorldSpace (ref direction, ref speed);
 		
 		animator.SetFloat ("Speed", speed);
-		animator.SetFloat ("Direction", InputController.h == 0 ? 0 : direction, DirectionDampTime, Time.deltaTime);
+		animator.SetFloat ("Direction", InputController.h == 0 ? 0 : direction, DirectionDampTime, Time.deltaTime);		
+	
+	}
+	
+	private void FixedUpdate ()
+	{
 		
-//		if (charState.IsJumping() && rb.velocity.y < 0.0f && Physics.Raycast(transform.position, Vector3.down , 0.1f))
-//		{
-//			animator.SetTrigger("JumpDown");
-//		}
-			
+		if (charState.IsJumping() && InputController.v != 0)
+		{
+			print ("Push forward");
+			rb.AddRelativeForce(new Vector3(0, 0, InputController.v * jumpZSpeed), ForceMode.Force);
+		}
 		
+		if (charState.Is (CharState.State.Running) && ((direction >= 0 && InputController.h >= 0) || 
+		   (direction < 0 && InputController.h < 0 )))
+		{
+			//print ("In locomotion");
+			Vector3 rotationAmount = Vector3.Lerp (Vector3.zero, new Vector3(0f, rotationDegreePerSecond * (InputController.h < 0f ? -1f : 1f), 0f), Mathf.Abs (InputController.h));
+			Quaternion deltaRotation = Quaternion.Euler(rotationAmount * Time.deltaTime);
+			transform.rotation = (transform.rotation * deltaRotation);
+		}
 	}
 	
 	// Hook on to Input event
@@ -79,7 +95,7 @@ public class CharController : MonoBehaviour {
 	// Trigger the jump animation and disable root motion
 	public void Jump (InputController.InputEvent _event)
 	{
-		if (_event == InputController.InputEvent.JumpUp)
+		if (_event == InputController.InputEvent.JumpUp && !charState.IsJumping())
 		{
 			//print ("Jump");
 			
@@ -110,33 +126,11 @@ public class CharController : MonoBehaviour {
 		}
 	}
 	
-	private void FixedUpdate ()
-	{
-		if (charState.Is (CharState.State.Running) && ((direction >= 0 && InputController.h >= 0) || (direction < 0 && InputController.h < 0 )))
-		{
-			//print ("In locomotion");
-			Vector3 rotationAmount = Vector3.Lerp (Vector3.zero, new Vector3(0f, rotationDegreePerSecond * (InputController.h < 0f ? -1f : 1f), 0f), Mathf.Abs (InputController.h));
-			Quaternion deltaRotation = Quaternion.Euler(rotationAmount * Time.deltaTime);
-			transform.rotation = (transform.rotation * deltaRotation);
-		}
-	}
 	
-	// Handle collisding with the floor
-//	private void OnCollisionEnter(Collision coll)
-//	{
-//		if (Util.IsGround(coll.collider.gameObject))
-//		{
-//			if (InputController.v == 0)
-//				charState.SetState (CharState.State.Idle);
-//			else
-//				charState.SetState (CharState.State.Running);
-//		}
-//	}
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// public Methods
 	//---------------------------------------------------------------------------------------------------------------------------
-
 	
 	public void StickToWorldSpace(ref float directionOut, ref float speedOut)
 	{
@@ -168,13 +162,16 @@ public class CharController : MonoBehaviour {
 		animator.applyRootMotion = true;
 	}
 	
+	// Check for collision with the ground and make sure the collision is from below
 	private void OnCollisionEnter (Collision coll)
 	{
+		
 		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
 		{
-			ContactPoint contact = coll.contacts[0];
+			//ContactPoint contact = coll.contacts[0];
+			print ("Collision from below. Jump Down");
 			
-			if (Vector3.Dot(contact.normal, Vector3.up) > 0.5f)
+			if (Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f)
 			{
 				animator.SetTrigger("Land");
 				print ("Collision from below. Jump Down");

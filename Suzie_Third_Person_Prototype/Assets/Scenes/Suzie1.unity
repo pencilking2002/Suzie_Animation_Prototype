@@ -449,7 +449,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DirectionDampTime: 1
   directionSpeed: 1
-  jumpForce: 70
+  jumpForce: 80
+  jumpZSpeed: 50
 --- !u!4 &442910724 stripped
 Transform:
   m_PrefabParentObject: {fileID: 465690, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}

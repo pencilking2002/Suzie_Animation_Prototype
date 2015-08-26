@@ -10,8 +10,9 @@ public class CharState : MonoBehaviour {
 	public enum State
 	{
 		Idle,
+		Landing,
 		IdleJumping,
-		RunningJumping  ,
+		RunningJumping,
 		Climbing,
 		Swimming,
 		Falling,
@@ -53,7 +54,7 @@ public class CharState : MonoBehaviour {
 	
 	public bool IsJumping()
 	{
-		return (state == State.IdleJumping || state == State.IdleJumping || state == State.RunningJumping || state == State.Falling);
+		return (state == State.IdleJumping || state == State.RunningJumping || state == State.Falling);
 		
 	}
 	
