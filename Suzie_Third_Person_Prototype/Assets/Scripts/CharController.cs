@@ -95,17 +95,25 @@ public class CharController : MonoBehaviour {
 	// Trigger the jump animation and disable root motion
 	public void Jump (InputController.InputEvent _event)
 	{
-		if (_event == InputController.InputEvent.JumpUp && !charState.IsJumping())
+		if (_event == InputController.InputEvent.JumpUp)
 		{
-			//print ("Jump");
-			
 			JumpUpAnim();
 			
 			//ApplyRootMotion(false);
 			
 			totalJump = Mathf.Clamp(jumpForce + jumpForce * InputController.Instance.jumpKeyHoldDuration, 0, maxJumpForce);
-			
-			rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+
+			if (charState.Is (CharState.State.Idle))
+			{
+				Util.Instance.DelayedAction(() => {
+					rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+				}, 0.15f);
+			}
+			else if (charState.Is (CharState.State.Running))
+			{
+				rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+			}
+
 		}
 		
 	}

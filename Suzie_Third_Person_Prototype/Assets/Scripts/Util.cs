@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Util : MonoBehaviour {
 	
@@ -20,6 +21,18 @@ public class Util : MonoBehaviour {
 	{
 		return obj.layer == 8;
 	}
+
+	public void DelayedAction(Action method, float delay)
+	{
+		StartCoroutine(C(method, delay));
+	}
+	
+	private IEnumerator C (Action method, float delay)
+	{
+		yield return new WaitForSeconds(delay);
+		method ();
+	}
+
 
 
 }
