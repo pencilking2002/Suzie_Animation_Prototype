@@ -566,14 +566,14 @@ MonoBehaviour:
   camOffset: {x: 0, y: 2, z: 5}
   distanceUp: 1
   distanceAway: 3
-  smooth: 5
   camSmoothDampTime: 19.2999992
   camTargetSmoothDampTime: 17.2999992
   camSmoothDampTimeGoBack: .25
   lookDirDampTime: .108999997
   goBackLerpSpeed: 37.4000015
-  camState: 0
   targetLerpSpeed: 3
+  orbitSpeed: 30
+  camState: 0
   follow: {fileID: 2086329366}
 --- !u!1 &565086904
 GameObject:

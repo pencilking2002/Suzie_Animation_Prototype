@@ -12,8 +12,6 @@ public class ThirdPersonCamera : MonoBehaviour
 	public float distanceUp = 2.0f;
 	public float distanceAway = 5.0f;
 	
-	public float smooth;
-	
 	[Range(0.0f, 100.0f)]
 	public float camSmoothDampTime = 0.1f;
 
@@ -29,10 +27,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
 	[Range(0.0f, 50f)]
 	public float goBackLerpSpeed = 5f;
-	// Camera recentering
-	//[Header("Recenter Camera")]
-	//public float wideScreen = 0.2f;
-	//public float taegetingTime = 0.5f;
+	
+	public float targetLerpSpeed = 3f;
+	
+	public float orbitSpeed = 30f;			// How fast to orbit the mouse around the character
 	
 	// Camera States
 	public enum CamState
@@ -45,16 +43,14 @@ public class ThirdPersonCamera : MonoBehaviour
 	}
 	[HideInInspector]
 	public CamState camState = CamState.Behind;
-	public float targetLerpSpeed = 3f;
-	public float orbitSpeed = 30f;
+	
+	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------
-
-	private float goBackVel;
-
+	
 	private float origCamSmoothDampTime;
-
+	
 	private Vector3 charOffset;
 	public Transform follow;
 	private Vector3 targetPos;
@@ -66,8 +62,12 @@ public class ThirdPersonCamera : MonoBehaviour
 	//temp vars
 	private Vector3 velocityCamSmooth = Vector3.zero;
 	private Vector3 velocityLookDir = Vector3.zero;
+	private float goBackVel;
+	
 	private float tempCamSmooth;
 	private float smoothLerpSpeed;
+	private float smooth;					// This value is used to smooth the smoothDampTime value and changes based on the cam state
+	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
@@ -131,13 +131,6 @@ public class ThirdPersonCamera : MonoBehaviour
 			    	SetState(CamState.Behind);
 				
 			break;
-
-//			case CamState.Orbit :
-//				
-////				print ("Orbit state");
-////				lookDir = charOffset - transform.position;
-////				targetPos = charOffset + follow.up * distanceUp - (lookDir * ) * distanceAway;
-//				break;
 	
 		}
 
@@ -149,7 +142,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, smooth, ref goBackVel, smoothLerpSpeed * Time.deltaTime);
 		
 
-		if (camState == CamState.Orbit && !charState.IsInLocomotion())
+		if (camState == CamState.Orbit)
 			transform.RotateAround(follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
 		else
 			transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, camSmoothDampTime * Time.deltaTime);
@@ -165,7 +158,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		RaycastHit wallHit = new RaycastHit();
 		if (Physics.Linecast (fromObject, toTarget, out wallHit))
 		{
-			print ("Wall hit");
+			//print ("Wall hit");
 			Debug.DrawRay (wallHit.point, Vector3.left, Color.red);
 			toTarget = new Vector3(wallHit.point.x, toTarget.y, wallHit.point.z);
 		}
@@ -174,33 +167,41 @@ public class ThirdPersonCamera : MonoBehaviour
 	// Hook on to Input event
 	private void OnEnable () 
 	{ 
-		InputController.onInput += RecenterCam;
-		InputController.onInput += Orbit; 
+		InputController.onInput += ChangeCamState;
 	}
 	private void OnDisable () 
 	{ 
-		InputController.onInput -= RecenterCam;
-		InputController.onInput -= Orbit; 
+		InputController.onInput -= ChangeCamState;
 	}
 	
-	private void RecenterCam (InputController.InputEvent _event)
+	private void ChangeCamState (InputController.InputEvent e)
 	{
-		if (_event == InputController.InputEvent.RecenterCam)
+		switch (e)
 		{
-			SetState (CamState.Target);
-			print ("Recenter Cam");
-		} else if (_event == InputController.InputEvent.CamBehind)
-		{
-			SetState(CamState.Behind);
-			print ("Recenter Cam");		
+			case InputController.InputEvent.RecenterCam:
+			
+				SetState (CamState.Target);
+				break;
+				
+			case InputController.InputEvent.CamBehind:
+			
+				SetState(CamState.Behind);
+				break;
+			
+			case InputController.InputEvent.OrbitCamera:
+			
+				if (!charState.IsInLocomotion())
+					SetState (CamState.Orbit);
+					
+				break;
 		}
 	}
 
-	private void Orbit (InputController.InputEvent _event)
-	{
-		if (_event == InputController.InputEvent.OrbitCamera)
-			SetState (CamState.Orbit);
-	}
+//	private void Orbit (InputController.InputEvent _event)
+//	{
+//		if (_event == InputController.InputEvent.OrbitCamera)
+//			SetState (CamState.Orbit);
+//	}
 
 	private void SetState (CamState _state)
 	{

@@ -122,16 +122,9 @@ public class CharController : MonoBehaviour {
 	private void JumpUpAnim()
 	{
 		if (speed == 0 )
-		{
-			//charState.SetState(CharState.State.IdleJumping);
-	 		animator.SetTrigger("IdleJump");
-	 		print ("Triggered idle jump");
-	 	}
+			animator.SetTrigger("IdleJump");
 	 	else
-	 	{
-			//charState.SetState(CharState.State.RunningJumping);
-			animator.SetTrigger("RunningJump");
-		}
+	 		animator.SetTrigger("RunningJump");
 	}
 	
 	
@@ -176,13 +169,9 @@ public class CharController : MonoBehaviour {
 		
 		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
 		{
-			//ContactPoint contact = coll.contacts[0];
-			//print ("Collision from below. Jump Down");
-			
 			if (Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f)
 			{
 				animator.SetTrigger("Land");
-				//print ("Collision from below. Jump Down");
 			}
 		}
 	}

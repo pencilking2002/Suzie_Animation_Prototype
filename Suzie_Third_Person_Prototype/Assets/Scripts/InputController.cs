@@ -10,8 +10,8 @@ public class InputController : MonoBehaviour {
 	
 	public static InputController Instance;
 	
-	public static float h, v;
-	public static float orbitH;
+	public static float h, v, orbitH;
+
 	
 	// Input Events -------------------------------------------------------------
 	public delegate void InputAction(InputEvent inputEvent);
@@ -47,13 +47,14 @@ public class InputController : MonoBehaviour {
 		h = inputDevice.LeftStickX;
 		v = inputDevice.LeftStickY;
 		orbitH = inputDevice.RightStickX;
-		//print (v);
 		
-		// if pressed Y or pressed Space
+		//----------------------------------------------------------------------------------------------------------------------
+		// Jumping
+		//----------------------------------------------------------------------------------------------------------------------
+		
 		if (inputDevice.Action4.IsPressed)
-		{
 			jumpKeyHoldDuration += Time.deltaTime;
-		}
+		
 		
 		// if pressed Y or pressed Space
 		if (inputDevice.Action4.WasReleased)
@@ -61,28 +62,27 @@ public class InputController : MonoBehaviour {
 			onInput(InputEvent.JumpUp);
 			
 			// Reset the jump key timer
-			jumpKeyHoldDuration = 0.0f;
-				
-			//print ("Pressed Jump");
+			jumpKeyHoldDuration = 0.0f;	
 		}
 
+		//----------------------------------------------------------------------------------------------------------------------
+		// Recenter Camera
+		//----------------------------------------------------------------------------------------------------------------------
+		
 		if (inputDevice.RightBumper.WasReleased)
-		{
 			onInput(InputEvent.RecenterCam);	
-		}
-		//print (inputDevice.RightStickX);
-
+		
+		//----------------------------------------------------------------------------------------------------------------------
+		// Camera Orbiting
+		//----------------------------------------------------------------------------------------------------------------------
+		
 		if (inputDevice.RightStickX.WasPressed)
-		{
 			onInput(InputEvent.OrbitCamera);
-			//print ("Down");
-		}
+		
 
 		if (inputDevice.RightStickX.WasReleased)
-		{
 			onInput(InputEvent.CamBehind);
-			//print ("Down");
-		}	
+			
 	}
 		
 	
