@@ -10,7 +10,7 @@ public class InputController : MonoBehaviour {
 	
 	public static InputController Instance;
 	
-	public static float h, v, orbitH;
+	public static float h, v, orbitH, orbitV;
 
 	
 	// Input Events -------------------------------------------------------------
@@ -33,20 +33,23 @@ public class InputController : MonoBehaviour {
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Priate Variables
 	//---------------------------------------------------------------------------------------------------------------------------
-	
+	private InputDevice inputDevice;
+
 	private void Awake ()
 	{
 		if (Instance == null)
 			Instance = this;
+		//inputDevice = InputManager.ActiveDevice;
 	}
 	
 	private void Update ()
 	{
-		var inputDevice = InputManager.ActiveDevice;
+		inputDevice = InputManager.ActiveDevice;
 		
 		h = inputDevice.LeftStickX;
 		v = inputDevice.LeftStickY;
 		orbitH = inputDevice.RightStickX;
+		orbitV = inputDevice.RightStickY;
 		
 		//----------------------------------------------------------------------------------------------------------------------
 		// Jumping

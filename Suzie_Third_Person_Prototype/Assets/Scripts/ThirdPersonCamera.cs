@@ -142,14 +142,17 @@ public class ThirdPersonCamera : MonoBehaviour
 		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, smooth, ref goBackVel, smoothLerpSpeed * Time.deltaTime);
 		
 
-		if (camState == CamState.Orbit)
-			transform.RotateAround(follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
-		else
+		if (camState == CamState.Orbit) 
+		{
+			transform.RotateAround (follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
+			transform.RotateAround (follow.position, Vector3.forward, InputController.orbitV * orbitSpeed * Time.deltaTime);
+		} 
+		else 
+		{
 			transform.position = Vector3.SmoothDamp (transform.position, targetPos, ref velocityCamSmooth, camSmoothDampTime * Time.deltaTime);
+		}
 
 		transform.LookAt(charOffset);
-		//var lookRot = Quaternion.LookRotation(charOffset - transform.position);
-		//transform.rotation = Quaternion.Lerp(transform.rotation,lookRot,Time.deltaTime* 20f);
 	}
 	
 	// Compensate the camera for wall collisions
@@ -159,20 +162,14 @@ public class ThirdPersonCamera : MonoBehaviour
 		if (Physics.Linecast (fromObject, toTarget, out wallHit))
 		{
 			//print ("Wall hit");
-			Debug.DrawRay (wallHit.point, Vector3.left, Color.red);
+			//Debug.DrawRay (wallHit.point, Vector3.left, Color.red);
 			toTarget = new Vector3(wallHit.point.x, toTarget.y, wallHit.point.z);
 		}
 	}
 	
 	// Hook on to Input event
-	private void OnEnable () 
-	{ 
-		InputController.onInput += ChangeCamState;
-	}
-	private void OnDisable () 
-	{ 
-		InputController.onInput -= ChangeCamState;
-	}
+	private void OnEnable () { InputController.onInput += ChangeCamState; }
+	private void OnDisable () { InputController.onInput -= ChangeCamState; }
 	
 	private void ChangeCamState (InputController.InputEvent e)
 	{
@@ -197,15 +194,9 @@ public class ThirdPersonCamera : MonoBehaviour
 		}
 	}
 
-//	private void Orbit (InputController.InputEvent _event)
-//	{
-//		if (_event == InputController.InputEvent.OrbitCamera)
-//			SetState (CamState.Orbit);
-//	}
-
-	private void SetState (CamState _state)
+	private void SetState (CamState s)
 	{
-		camState = _state;
+		camState = s;
 	}
 	
 }

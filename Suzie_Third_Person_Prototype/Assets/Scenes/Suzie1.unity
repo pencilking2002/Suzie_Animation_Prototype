@@ -448,8 +448,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DirectionDampTime: 1
+  speedDampTime: .0500000007
   directionSpeed: 1
   jumpForce: 80
+  locomotionThreshold: .200000003
   jumpZSpeed: 50
 --- !u!4 &442910724 stripped
 Transform:
@@ -572,7 +574,7 @@ MonoBehaviour:
   lookDirDampTime: .108999997
   goBackLerpSpeed: 37.4000015
   targetLerpSpeed: 3
-  orbitSpeed: 30
+  orbitSpeed: 100
   camState: 0
   follow: {fileID: 2086329366}
 --- !u!1 &565086904

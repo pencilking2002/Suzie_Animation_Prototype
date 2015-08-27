@@ -8,15 +8,18 @@ public class CharController : MonoBehaviour {
 	//---------------------------------------------------------------------------------------------------------------------------	
 	
 	public float DirectionDampTime = 0.25f;
+	public float speedDampTime = 0.05f;
+
 	public float directionSpeed = 3.0f;
 	
 	public float jumpForce = 10f;
 	private float maxJumpForce;
-	
+
+	public float locomotionThreshold = 0.2f;
+
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
 	//---------------------------------------------------------------------------------------------------------------------------	
-	
 	
 	private float totalJump;			// Total amount of jump to add to the character
 		
@@ -25,6 +28,7 @@ public class CharController : MonoBehaviour {
 	
 	private float speed = 0.0f;
 	private float direction = 0.0f;
+	private float charAngle = 0.0f;
 	private Transform cam;
 	
 	// Speed modifier of the character's Z movement wheile jumping
@@ -37,13 +41,18 @@ public class CharController : MonoBehaviour {
 	private Vector3 moveDirection;
 	private Vector3 axisSign;
 	private float angleRootToMove;
-	Quaternion referentialShift;
+	Quaternion referentialShift; 
 	
 	private float rotationDegreePerSecond = 120f;
 	private AnimatorStateInfo stateInfo;
 
+	private Vector3 rotationAmount;
+	private Quaternion deltaRotation;
+
+
 	CharState charState;
-	
+
+
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
@@ -52,21 +61,36 @@ public class CharController : MonoBehaviour {
 	{
 		cam = Camera.main.transform;
 		animator = GetComponent<Animator>();
-		
 		charState = GetComponent<CharState>();
 		rb = GetComponent<Rigidbody>();
 		
 		maxJumpForce = jumpForce + 20f;
+
 	}
 	
 	private void Update ()
 	{
+		direction = 0;
+		charAngle = 0;
 
-		StickToWorldSpace (ref direction, ref speed);
-		
-		animator.SetFloat ("Speed", speed);
-		animator.SetFloat ("Direction", InputController.h == 0 ? 0 : direction, DirectionDampTime, Time.deltaTime);		
-	
+		StickToWorldSpace (ref direction, ref speed, ref charAngle);
+
+		animator.SetFloat ("Speed", speed, speedDampTime, Time.deltaTime);
+		animator.SetFloat ("Direction", direction, DirectionDampTime, Time.deltaTime);	
+		//animator.SetFloat ("Direction", InputController.h == 0 ? 0 : direction, DirectionDampTime, Time.deltaTime);
+
+		if (speed > locomotionThreshold) 
+		{
+			if (!charState.IsInPivot ()) {
+				animator.SetFloat ("Angle", charAngle);
+			}
+		} else if (speed < locomotionThreshold && Mathf.Abs(InputController.h) < 0.05f)
+		{
+			animator.SetFloat ("Direction", 0);
+			animator.SetFloat ("Angle", 0);
+		}
+
+		//print (charAngle);
 	}
 	
 	private void FixedUpdate ()
@@ -74,7 +98,7 @@ public class CharController : MonoBehaviour {
 		
 		if (charState.IsJumping() && InputController.v != 0)
 		{
-			print ("Push forward");
+			//print ("Push forward");
 			rb.AddRelativeForce(new Vector3(0, 0, InputController.v * jumpZSpeed), ForceMode.Force);
 		}
 		
@@ -82,8 +106,8 @@ public class CharController : MonoBehaviour {
 		   (direction < 0 && InputController.h < 0 )))
 		{
 			//print ("In locomotion");
-			Vector3 rotationAmount = Vector3.Lerp (Vector3.zero, new Vector3(0f, rotationDegreePerSecond * (InputController.h < 0f ? -1f : 1f), 0f), Mathf.Abs (InputController.h));
-			Quaternion deltaRotation = Quaternion.Euler(rotationAmount * Time.deltaTime);
+			rotationAmount = Vector3.Lerp (Vector3.zero, new Vector3(0f, rotationDegreePerSecond * (InputController.h < 0f ? -1f : 1f), 0f), Mathf.Abs (InputController.h));
+			deltaRotation = Quaternion.Euler(rotationAmount * Time.deltaTime);
 			transform.rotation = (transform.rotation * deltaRotation);
 		}
 	}
@@ -97,11 +121,7 @@ public class CharController : MonoBehaviour {
 	{
 		if (_event == InputController.InputEvent.JumpUp)
 		{
-			JumpUpAnim();
-			
-			//ApplyRootMotion(false);
-			
-			totalJump = Mathf.Clamp(jumpForce + jumpForce * InputController.Instance.jumpKeyHoldDuration, 0, maxJumpForce);
+			totalJump = Mathf.Clamp(jumpForce + (jumpForce * InputController.Instance.jumpKeyHoldDuration), 0, maxJumpForce);
 
 			if (charState.Is (CharState.State.Idle))
 			{
@@ -114,6 +134,7 @@ public class CharController : MonoBehaviour {
 				rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
 			}
 
+			JumpUpAnim();
 		}
 		
 	}
@@ -121,10 +142,7 @@ public class CharController : MonoBehaviour {
 	// Trigger the jump up animation
 	private void JumpUpAnim()
 	{
-		if (speed == 0 )
-			animator.SetTrigger("IdleJump");
-	 	else
-	 		animator.SetTrigger("RunningJump");
+		animator.SetTrigger (speed == 0.0f ? "IdleJump" : "RunningJump");
 	}
 	
 	
@@ -133,7 +151,7 @@ public class CharController : MonoBehaviour {
 	// public Methods
 	//---------------------------------------------------------------------------------------------------------------------------
 	
-	public void StickToWorldSpace(ref float directionOut, ref float speedOut)
+	public void StickToWorldSpace(ref float directionOut, ref float speedOut, ref float angleOut)
 	{
 		//rootDirection = root.forward;
 		
@@ -150,9 +168,14 @@ public class CharController : MonoBehaviour {
 		axisSign = Vector3.Cross (moveDirection, transform.forward);
 		
 		angleRootToMove = Vector3.Angle (transform.forward, moveDirection) * (axisSign.y >= 0 ? -1f : 1f);
-		
+
+		if (!charState.IsInPivot()) 
+		{
+			angleOut = angleRootToMove;
+		}
+
 		angleRootToMove /= 180;
-		
+
 		directionOut = angleRootToMove * directionSpeed;
 		
 	}
@@ -166,13 +189,19 @@ public class CharController : MonoBehaviour {
 	// Check for collision with the ground and make sure the collision is from below
 	private void OnCollisionEnter (Collision coll)
 	{
-		
-		if (coll.collider.gameObject.layer == 8 && charState.IsJumping())
+		if (coll.collider.gameObject.layer == 8 && charState.IsJumping() && Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f)
 		{
-			if (Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f)
-			{
-				animator.SetTrigger("Land");
-			}
+			animator.SetTrigger("Land");
+		}
+	}
+
+	// Handle a bug where the characters gets stuck in falling mode and doesn't land
+	private void OnCollisionStay (Collision coll)
+	{
+		if (coll.collider.gameObject.layer == 8 && charState.Is(CharState.State.Falling) && Vector3.Dot(coll.contacts[0].normal, Vector3.up) > 0.5f && rb.velocity.y <= 0)
+		{
+			//print (rb.velocity.y);
+			animator.SetTrigger("Land");
 		}
 	}
 	
