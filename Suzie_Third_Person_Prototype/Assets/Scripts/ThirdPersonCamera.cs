@@ -68,6 +68,7 @@ public class ThirdPersonCamera : MonoBehaviour
 	private float smoothLerpSpeed;
 	private float smooth;					// This value is used to smooth the smoothDampTime value and changes based on the cam state
 	
+	private float orbitYOffset = 0;
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
 	//---------------------------------------------------------------------------------------------------------------------------	
@@ -136,7 +137,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
 		targetPos = charOffset + follow.up * distanceUp - lookDir * distanceAway;
-
+		//targetPos.y += orbitYOffset;
+	
+		
 		CompensateForWalls(charOffset, ref targetPos);
 
 		camSmoothDampTime = Mathf.SmoothDamp (camSmoothDampTime, smooth, ref goBackVel, smoothLerpSpeed * Time.deltaTime);
@@ -146,6 +149,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		{
 			transform.RotateAround (follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
 			transform.RotateAround (follow.position, Vector3.forward, InputController.orbitV * orbitSpeed * Time.deltaTime);
+			//orbitYOffset = Mathf.Clamp (targetPos.y - transform.position.y, -0.2f, 1f);
 		} 
 		else 
 		{

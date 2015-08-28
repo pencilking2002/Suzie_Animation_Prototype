@@ -451,8 +451,9 @@ MonoBehaviour:
   speedDampTime: .0500000007
   directionSpeed: 1
   jumpForce: 80
+  jumpTurnSpeed: 1.70000005
+  jumpForwardSpeed: 5.69999981
   locomotionThreshold: .200000003
-  jumpZSpeed: 50
 --- !u!4 &442910724 stripped
 Transform:
   m_PrefabParentObject: {fileID: 465690, guid: 178ddc6b4425848ef9730a8bb314f783, type: 2}

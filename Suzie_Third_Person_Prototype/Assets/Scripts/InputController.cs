@@ -79,7 +79,7 @@ public class InputController : MonoBehaviour {
 		// Camera Orbiting
 		//----------------------------------------------------------------------------------------------------------------------
 		
-		if (inputDevice.RightStickX.WasPressed)
+		if (inputDevice.RightStickX.IsPressed)
 			onInput(InputEvent.OrbitCamera);
 		
 

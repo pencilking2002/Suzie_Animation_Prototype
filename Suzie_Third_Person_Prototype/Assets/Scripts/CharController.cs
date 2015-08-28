@@ -14,7 +14,13 @@ public class CharController : MonoBehaviour {
 	
 	public float jumpForce = 10f;
 	private float maxJumpForce;
-
+	
+	[Range(0,50)]
+	public float jumpTurnSpeed = 20f;
+	// Speed modifier of the character's Z movement wheile jumping
+	[Range(0,50)]
+	public float jumpForwardSpeed = 10f;
+	
 	public float locomotionThreshold = 0.2f;
 
 	//---------------------------------------------------------------------------------------------------------------------------
@@ -31,9 +37,7 @@ public class CharController : MonoBehaviour {
 	private float charAngle = 0.0f;
 	private Transform cam;
 	
-	// Speed modifier of the character's Z movement wheile jumping
-	public float jumpZSpeed = 10f;
-	
+
 	// Temp vars
 	//private Vector3 rootDirection;
 	private Vector3 stickDirection;
@@ -48,7 +52,7 @@ public class CharController : MonoBehaviour {
 
 	private Vector3 rotationAmount;
 	private Quaternion deltaRotation;
-
+	private float rot;
 
 	CharState charState;
 
@@ -84,22 +88,28 @@ public class CharController : MonoBehaviour {
 			if (!charState.IsInPivot ()) {
 				animator.SetFloat ("Angle", charAngle);
 			}
+			
 		} else if (speed < locomotionThreshold && Mathf.Abs(InputController.h) < 0.05f)
 		{
 			animator.SetFloat ("Direction", 0);
 			animator.SetFloat ("Angle", 0);
 		}
-
+		
 		//print (charAngle);
 	}
 	
 	private void FixedUpdate ()
 	{
 		
-		if (charState.IsJumping() && InputController.v != 0)
+		if (charState.IsJumping())
 		{
-			//print ("Push forward");
-			rb.AddRelativeForce(new Vector3(0, 0, InputController.v * jumpZSpeed), ForceMode.Force);
+			if (InputController.h != 0)		
+				rb.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + InputController.h * jumpTurnSpeed, transform.eulerAngles.z));	
+			
+			if (InputController.v != 0)
+				rb.AddRelativeForce(new Vector3(0, 0, InputController.v * jumpForwardSpeed), ForceMode.Acceleration);
+			
+			
 		}
 		
 		if (charState.Is (CharState.State.Running) && ((direction >= 0 && InputController.h >= 0) || 
@@ -127,14 +137,19 @@ public class CharController : MonoBehaviour {
 			{
 				Util.Instance.DelayedAction(() => {
 					rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+					
 				}, 0.15f);
+				
+				JumpUpAnim();
 			}
 			else if (charState.Is (CharState.State.Running))
 			{
 				rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+				
+				JumpUpAnim();
 			}
 
-			JumpUpAnim();
+			
 		}
 		
 	}
