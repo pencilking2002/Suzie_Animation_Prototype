@@ -148,7 +148,7 @@ public class ThirdPersonCamera : MonoBehaviour
 		if (camState == CamState.Orbit) 
 		{
 			transform.RotateAround (follow.position, Vector3.up, InputController.orbitH * orbitSpeed * Time.deltaTime);
-			transform.RotateAround (follow.position, Vector3.forward, InputController.orbitV * orbitSpeed * Time.deltaTime);
+			//transform.RotateAround (follow.position, Vector3.forward, InputController.orbitV * orbitSpeed * Time.deltaTime);
 			//orbitYOffset = Mathf.Clamp (targetPos.y - transform.position.y, -0.2f, 1f);
 		} 
 		else 
