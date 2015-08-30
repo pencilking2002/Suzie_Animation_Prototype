@@ -98,9 +98,11 @@ public class ThirdPersonCamera : MonoBehaviour
 				smoothLerpSpeed = goBackLerpSpeed;
 
 				if (charState.IsInLocomotion())
-				{
+				{	
+
+					//print(Vector3.Dot(follow.forward, transform.forward));
 					// If the character is running backward, switch the damping to a lower value so the Squirrel will keep a far distance to the camera
-					if (InputController.v < -0.05) 
+					if (Vector3.Dot(follow.forward, transform.forward) < -0.7f)//if (InputController.v < -0.05) 
 						smooth = camSmoothDampTimeGoBack;
 
 					//lookDir = Vector3.Lerp (follow.right * (InputController.h < 0 ? 1f : -1f), follow.forward * (InputController.v < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)) * goBackLerpSpeed * Time.deltaTime);

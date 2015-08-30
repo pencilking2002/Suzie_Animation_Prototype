@@ -123,42 +123,62 @@ public class CharController : MonoBehaviour {
 	}
 	
 	// Hook on to Input event
-	private void OnEnable () { InputController.onInput += Jump; }
-	private void OnDisable () { InputController.onInput -= Jump; }
+	private void OnEnable () 
+	{ 
+		InputController.onInput += Jump;
+		//InputController.onInput += FaceOppositeDir; 
+	}
+	private void OnDisable () 
+	{ 
+		InputController.onInput -= Jump;
+		//InputController.onInput -= FaceOppositeDir; 
+	}
 	
 	// Trigger the jump animation and disable root motion
 	public void Jump (InputController.InputEvent _event)
 	{
-		if (_event == InputController.InputEvent.JumpUp)
-		{
-			totalJump = Mathf.Clamp(jumpForce + (jumpForce * InputController.Instance.jumpKeyHoldDuration), 0, maxJumpForce);
+		if (_event == InputController.InputEvent.JumpUp) {
+			totalJump = Mathf.Clamp (jumpForce + (jumpForce * InputController.Instance.jumpKeyHoldDuration), 0, maxJumpForce);
 
-			if (charState.Is (CharState.State.Idle))
-			{
-				Util.Instance.DelayedAction(() => {
-					rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+			if (charState.Is (CharState.State.Idle)) {
+				Util.Instance.DelayedAction (() => {
+					rb.AddForce (new Vector3 (0, totalJump, 0), ForceMode.Impulse);
 					
 				}, 0.15f);
 				
-				JumpUpAnim();
-			}
-			else if (charState.Is (CharState.State.Running))
-			{
-				rb.AddForce(new Vector3(0, totalJump, 0), ForceMode.Impulse);
+				JumpUpAnim ();
+			} else if (charState.Is (CharState.State.Running)) {
+				rb.AddForce (new Vector3 (0, totalJump, 0), ForceMode.Impulse);
 				
-				JumpUpAnim();
+				JumpUpAnim ();
 			}
-
-			
 		}
-		
 	}
-	
+
 	// Trigger the jump up animation
 	private void JumpUpAnim()
 	{
 		animator.SetTrigger (speed == 0.0f ? "IdleJump" : "RunningJump");
 	}
+
+//	private void FaceOppositeDir (InputController.InputEvent e)
+//	{
+//		if (e == InputController.InputEvent.faceOppositeDirection && InputController.v < 0)
+//		{
+//			//Vector3 camDirection = Vector3.Normalize(Camera.main.transform.position - transform.position);
+////			print ("Cam forward: " + Camera.main.transform.forward);
+////			print ("Squirrel forward: " + transform.forward);
+//			if (Vector3.Dot (Camera.main.transform.forward, transform.forward) > 0.5f)
+//			{
+//				print ("turn in opposite direction");
+//			}
+//			print (Vector3.Dot (Camera.main.transform.forward, transform.forward));
+//			//transform.eulerAngles = new Vector3(transform.eulerAngles.x, -transform.eulerAngles.y, transform.eulerAngles.z);
+//
+//			rb.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, -transform.eulerAngles.y, transform.eulerAngles.z));
+//		}
+//	}
+
 	
 	
 	
@@ -218,6 +238,12 @@ public class CharController : MonoBehaviour {
 			//print (rb.velocity.y);
 			animator.SetTrigger("Land");
 		}
+	}
+
+	private void OnTriggerEnter(Collider col)
+	{
+
+		print ("trigger enter: " + col.name);
 	}
 	
 	
