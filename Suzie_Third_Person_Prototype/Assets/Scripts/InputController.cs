@@ -23,7 +23,8 @@ public class InputController : MonoBehaviour {
 		JumpUp,
 		RecenterCam,
 		CamBehind,
-		OrbitCamera
+		OrbitCamera,
+		faceOppositeDirection
 	}
 	
 	[HideInInspector]
@@ -46,10 +47,11 @@ public class InputController : MonoBehaviour {
 	{
 		inputDevice = InputManager.ActiveDevice;
 		
-		h = inputDevice.LeftStickX;
-		v = inputDevice.LeftStickY;
+		h = inputDevice.LeftStickX.Value;
+		v = inputDevice.LeftStickY.Value;
 		orbitH = inputDevice.RightStickX;
 		orbitV = inputDevice.RightStickY;
+		//print (inputDevice.RightStickX);
 		
 		//----------------------------------------------------------------------------------------------------------------------
 		// Jumping
@@ -86,6 +88,8 @@ public class InputController : MonoBehaviour {
 		if (inputDevice.RightStickX.WasReleased)
 			onInput(InputEvent.CamBehind);
 			
+		if (inputDevice.LeftStickY.WasPressed)
+			onInput(InputEvent.faceOppositeDirection);
 	}
 		
 	
