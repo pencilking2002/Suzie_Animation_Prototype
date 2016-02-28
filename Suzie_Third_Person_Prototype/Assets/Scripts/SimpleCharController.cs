@@ -13,7 +13,6 @@ public class SimpleCharController : MonoBehaviour {
 	public float idleTurnSpeed = 10.0f;
 	public float runningTurnSpeed = 10.0f;
 
-
 	public float jumpForce = 10f;
 	private float maxJumpForce;
 	
@@ -22,8 +21,6 @@ public class SimpleCharController : MonoBehaviour {
 	// Speed modifier of the character's Z movement wheile jumping
 	[Range(0,50)]
 	public float jumpForwardSpeed = 10f;
-	
-
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Variables
@@ -39,9 +36,7 @@ public class SimpleCharController : MonoBehaviour {
 	private float charAngle = 0.0f;
 	private Transform cam;
 
-	
 	CharState charState;
-	
 	
 	//---------------------------------------------------------------------------------------------------------------------------
 	// Private Methods
@@ -60,10 +55,10 @@ public class SimpleCharController : MonoBehaviour {
 	
 	private void Update ()
 	{
-		animator.SetFloat ("Speed", InputController.v, speedDampTime, Time.deltaTime);
+		//animator.SetFloat ("Speed", InputController.v, speedDampTime, Time.deltaTime);
 		animator.SetFloat ("Direction", InputController.h, DirectionDampTime, Time.deltaTime);
 
-		print (InputController.v);
+		//print (InputController.v);
 
 
 	}
@@ -77,6 +72,7 @@ public class SimpleCharController : MonoBehaviour {
 			// When jumping player is able to rotate the character
 			rb.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, transform.eulerAngles.y + InputController.h * runningTurnSpeed, transform.eulerAngles.z));	
 			//rb.AddTorque(new Vector3(0, InputController.h * runningTurnSpeed, 0));
+			
 		}
 
 		if (charState.IsJumping())
@@ -87,6 +83,12 @@ public class SimpleCharController : MonoBehaviour {
 			// Character moves extra forward if player is pressing the vertical stick
 			rb.AddRelativeForce(new Vector3(0, 0, InputController.v * jumpForwardSpeed), ForceMode.Acceleration);
 			
+			if (InputController.v < 0 && Vector3.Dot (Camera.main.transform.forward, transform.forward) > 0.5f)
+			{
+				//transform.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, transform.eulerAngles.y - 180, transform.eulerAngles.z));
+				animator.SetTrigger ("Turn180");
+			}
+			
 		}
 		
 
@@ -96,12 +98,16 @@ public class SimpleCharController : MonoBehaviour {
 	private void OnEnable () 
 	{ 
 		InputController.onInput += Jump;
-		InputController.onInput += FaceOppositeDir; 
+		InputController.onInput += FaceOppositeDir;
+		InputController.onInput += StartRunning;
+		InputController.onInput += StopRunning;  
 	}
 	private void OnDisable () 
 	{ 
 		InputController.onInput -= Jump;
-		InputController.onInput -= FaceOppositeDir; 
+		InputController.onInput -= FaceOppositeDir;
+		InputController.onInput -= StartRunning;
+		InputController.onInput -= StopRunning;   
 	}
 	
 	// Trigger the jump animation and disable root motion
@@ -134,23 +140,26 @@ public class SimpleCharController : MonoBehaviour {
 	
 	private void FaceOppositeDir (InputController.InputEvent e)
 	{
-		if (e == InputController.InputEvent.faceOppositeDirection && InputController.v < 0)
+		if (InputController.v < 0 && e == InputController.InputEvent.faceOppositeDirection && Vector3.Dot (Camera.main.transform.forward, transform.forward) > 0.5f)
 		{
-			//Vector3 camDirection = Vector3.Normalize(Camera.main.transform.position - transform.position);
-//			print ("Cam forward: " + Camera.main.transform.forward);
-//			print ("Squirrel forward: " + transform.forward);
-//				if (Vector3.Dot (Camera.main.transform.forward, transform.forward) > 0.5f)
-//				{
-//					print ("turn in opposite direction");
-//				}
-//				print (Vector3.Dot (Camera.main.transform.forward, transform.forward));
-			//transform.eulerAngles = new Vector3(transform.eulerAngles.x, -transform.eulerAngles.y, transform.eulerAngles.z);
-
 			transform.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, transform.eulerAngles.y - 180, transform.eulerAngles.z));
 
 			//rb.rotation = Quaternion.Euler (new Vector3(transform.eulerAngles.x, transform.eulerAngles.y - 180, transform.eulerAngles.z));
 			print ("turn");
+			animator.SetTrigger ("Turn180");
 		}
+	}
+	
+	private void StartRunning(InputController.InputEvent e)
+	{
+		if (e == InputController.InputEvent.StartRunning)
+			animator.SetTrigger ("StartRunning");
+	}
+	
+	private void StopRunning(InputController.InputEvent e)
+	{
+		if (e == InputController.InputEvent.StopRunning)
+			animator.SetTrigger ("StopRunning");
 	}
 	
 	

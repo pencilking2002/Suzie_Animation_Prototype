@@ -502,7 +502,7 @@ ModelImporter:
     - serializedVersion: 16
       name: PlantNTurnLeft180
       takeName: _74_a_U1_M_P_PlantNTurn180_Run_R_Fb_p180_No_0_PJ_4
-      firstFrame: 133
+      firstFrame: 153
       lastFrame: 194.699997
       wrapMode: 0
       orientationOffsetY: 0
@@ -511,10 +511,10 @@ ModelImporter:
       loop: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
+      loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 0
       keepOriginalPositionXZ: 0
       heightFromFeet: 1
